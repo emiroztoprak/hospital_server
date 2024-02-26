@@ -117,13 +117,28 @@ public class HospitalServiceEndpointImpl extends HospitalServiceEndpointImplBase
 
     @Override
     public void deleteHospital(DeleteHospitalRequest request, StreamObserver<DeleteResponse> responseObserver) {
-        Optional.ofNullable(request)
-                .map(DeleteHospitalRequest::getId)
-                .ifPresent(hospitalRepository::deleteById);
+        Optional<Long> optionalId = Optional.ofNullable(request).map(DeleteHospitalRequest::getId);
 
-        responseObserver.onNext(DeleteResponse.newBuilder()
-                .setSuccess(true).build());
+        if (optionalId.isPresent()) {
+            long id = optionalId.get();
+            if (hospitalRepository.existsById(id)) {
+                hospitalRepository.deleteById(id);
+                responseObserver.onNext(DeleteResponse.newBuilder()
+                        .setSuccess(true)
+                        .build());
+            } else {
+                responseObserver.onNext(DeleteResponse.newBuilder()
+                        .setSuccess(false)
+                        .build());
+            }
+        } else {
+            responseObserver.onNext(DeleteResponse.newBuilder()
+                    .setSuccess(false)
+                    .build());
+        }
+
         responseObserver.onCompleted();
+
     }
 
     private HospitalResponse convertToHospitalResponse(Hospital hospital) {

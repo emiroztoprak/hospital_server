@@ -176,12 +176,26 @@ public class PatientServiceEndpointImpl extends PatientServiceEndpointImplBase {
 
     @Override
     public void deletePatient(DeletePatientRequest request, StreamObserver<DeleteResponse> responseObserver) {
-        Optional.ofNullable(request).
-                map(DeletePatientRequest::getId).
-                ifPresent(patientRepository::deleteById);
+        Optional<Long> optionalId = Optional.ofNullable(request).map(DeletePatientRequest::getId);
 
-        responseObserver.onNext(DeleteResponse.newBuilder().
-                setSuccess(true).build());
+        if (optionalId.isPresent()) {
+            long id = optionalId.get();
+            if (patientRepository.existsById(id)) {
+                patientRepository.deleteById(id);
+                responseObserver.onNext(DeleteResponse.newBuilder()
+                        .setSuccess(true)
+                        .build());
+            } else {
+                responseObserver.onNext(DeleteResponse.newBuilder()
+                        .setSuccess(false)
+                        .build());
+            }
+        } else {
+            responseObserver.onNext(DeleteResponse.newBuilder()
+                    .setSuccess(false)
+                    .build());
+        }
+
         responseObserver.onCompleted();
     }
 
