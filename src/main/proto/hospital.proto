@@ -1,0 +1,59 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option java_package = "hospital.server.grpc";
+package Hospital;
+option java_outer_classname = "HospitalOuterClass";
+
+
+
+// The gRPC service definitions for Hospital and Patient management
+service HospitalServiceEndpoint {
+  rpc CreateHospital (CreateHospitalRequest) returns (HospitalResponse) {}
+  rpc UpdateHospital (UpdateHospitalRequest) returns (HospitalResponse) {}
+  rpc DeleteHospital (DeleteHospitalRequest) returns (DeleteResponse) {}
+  rpc ListHospitalsByPatientId (ListByPatientIdRequest) returns (ListHospitalsResponse) {}
+  rpc ListAllHospitals(google.protobuf.Empty) returns (ListHospitalsResponse){}
+  rpc FindById(FindByIdRequest) returns (HospitalResponse);
+
+}
+
+// Request and Response messages
+message CreateHospitalRequest {
+  string name = 1;
+  string address = 2;
+}
+message FindByIdRequest {
+  int64 id = 1;
+}
+message UpdateHospitalRequest {
+  int64 id = 1;
+  string name = 2;
+  string address = 3;
+}
+
+message DeleteHospitalRequest {
+  int64 id = 1;
+}
+
+
+message ListByPatientIdRequest {
+  int64 patientId = 1;
+}
+
+message HospitalResponse {
+  int64 id = 1;
+  string name = 2;
+  string address = 3;
+}
+
+
+
+message DeleteResponse {
+  bool success = 1;
+}
+
+
+
+message ListHospitalsResponse {
+  repeated HospitalResponse hospitals = 1;
+}
