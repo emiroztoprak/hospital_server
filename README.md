@@ -44,3 +44,16 @@ Special request:
 The director of the largest hospital in the country (around 500.000 patients per year) wants to have an overview of the average age of the patients who visited the hospital, divided by sex and per month, for the past 10 years. He wants to see this information immediately (<200ms). Describe in detail how you would fulfill this request.
 
 
+To calculate the average with each request is not feasible. Loading up all the data and doing the calculations would definitely take more than 200 ms. To overcome this problem, we can create a new immutable (since entries need not to be changed) entity named AverageMonthlyAge, which has the following fields:
+
+- int year
+- int month
+- String sex
+- double averageAge
+
+We can calculate the monthly average of different sexes using either "@Scheduled" (org.springframework.scheduling.annotation.Scheduled) of Spring or using scripts that run SQL on database to load the monthly data separated by sexes and save the results as a AverageMonthlyAge object after calculating the average age. Loading up 500000 patient objects could be tricky since it can cause memory overflow especially if the system is already busy with daily traffic. Here we need to make sure that the Patient objects have FetchType set as "Lazy". Because if not, with every Patient entry, we would also load into memory their linked hospital objects as well. This would greatly increase the memory usage by a large amount. 
+
+If the memory bottleneck is still an issue, the operation can be done more frequently, e.g. biweekly or weekly. This would also provide a more up-to-date data compared to monthly calculations. In the long run, a system-level solution could also be implemented, such as a data warehouse. This would allow the data marts to load up the data for calculations while the system is still ongoing as if nothing is happening in the background. These systems create daily calculations similar to this special request so that the reports and the required analysis can go smoothly. This would not be needed for our case because the Patient object is very small in our system with only 6 simple fields.
+
+So in summary, a monthly scheduled operation to calculate the average age divided by sex and month would be a very feasible solution for this problem. Reading the results from the AverageMonthlyAge table would be very simple and fast (<200ms). 
+
